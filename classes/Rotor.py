@@ -11,14 +11,15 @@ class Rotor:
         @param mapping: str, 26 characters, the mapping of each letter in the alphabet in lexigraphical order
         @param left_connection: Rotor object that is located physically to the left of this rotor
         @param right_connection: Rotor object that is location physically to the right of this rotor
-        @param setting: numeric string value
+        @param setting: numeric string value representing the ring setting of the rotor
+        @param position: character representing the initial rotation of the rotor
         @returns newly instantiated Rotor object
         """
         notch = None
 
         # Method defense
-        type_assertion(left_connection, Rotor)
-        type_assertion(right_connection, Rotor)
+        type_assertion(left_connection, Rotor, True)
+        type_assertion(right_connection, Rotor, True)
         type_assertion(setting, str)
         type_assertion(position, str)
         type_assertion(mapping, str)
@@ -51,6 +52,11 @@ class Rotor:
         self.ring_setting = None
 
     def rotate(self):
+        """
+        Rotates this rotor by 1 position
+
+        @returns Nothing
+        """
         if self.left_connection is not None and self.rotation == self.notch:
             self.left_connection.rotate()
 
@@ -58,30 +64,50 @@ class Rotor:
         self.rotation %= 26
 
     def encode_right_to_left(self, character):
+        """
+        Takes an input onto this rotor's pin and pushes the current through
+        the circuit and returns this rotor's contact.
+
+        Input should be as if the rotor has no rotation, for example, if
+        this rotor has been rotated once and the input is B, the rotor
+        will treat the input on its A pin.
+
+        @param character: the character of the input pin
+        @returns character: the character of the output contact
+        """
         # Method defense
         type_assertion(character, str)
         length_assertion(character, 1)
         character = character.upper()
         lexigraphical_range_assertion(character, "A", "Z")
 
-        index = ord(character) - 65 + self.rotation
+        index = ord(character) - 65
 
+        # Adjust for our own rotation
+        index += self.rotation
+
+        # Adjust for the rotation of the input rotor
         if self.right_connection:
             index -= self.right_connection.rotation
 
+        # Constrain to the rotor's circle
         index %= 26
 
         encoded_character = self.mapping[index]
-
-        if self.left_connection:
-            return self.left_connection.encode_right_to_left(encoded_character)
-        elif self.right_connection:
-            # In case this rotor is a reflector
-            return self.right_connection.encode_left_to_right(encoded_character)
-        else:
-            return encoded_character
+        return encoded_character
 
     def encode_left_to_right(self, character):
+        """
+        Takes an input onto this rotor's contact and pushes the current through
+        the circuit and returns this rotor's pin.
+
+        Input should be as if the rotor has no rotation, for example, if
+        this rotor has been rotated once and the input is A, the rotor
+        will treat the input on its B contact.
+
+        @param character: the character of the input contact
+        @returns character: the character of the output pin
+        """
         # Method defense
         type_assertion(character, str)
         length_assertion(character, 1)
@@ -92,8 +118,4 @@ class Rotor:
         index = (self.mapping.find(character) - self.rotation) % 26
 
         encoded_character = chr(index + 65)
-
-        if self.right_connection:
-            return self.right_connection.encode_left_to_right(encoded_character)
-        else:
-            return encoded_character
+        return encoded_character
