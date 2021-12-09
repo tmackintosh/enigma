@@ -194,9 +194,9 @@ class Rotor:
             raise ValueError("Character must be between A-Z")
 
         character = chr(((ord(character) - 65 + self.rotation) % 26) + 65)
-        index = self.mapping.find(character)
+        index = (self.mapping.find(character) - self.rotation) % 26
 
-        encoded_character = chr(index + 65 - self.rotation)
+        encoded_character = chr(index + 65)
 
         if self.right_connection:
             return self.right_connection.encode_left_to_right(encoded_character)
@@ -213,7 +213,7 @@ class EnigmaMachine:
         self.plugboard = Plugboard()
 
         for plug in plugboard_pairs:
-            self.plugboard.add(plug)
+            self.plugboard.add(PlugLead(plug))
 
     def initialize_rotors(self, rotors, reflector, ring_settings, positions):
         self.right_rotor = rotor_from_name(rotors[2], ring_settings[2], positions[2])
@@ -241,7 +241,7 @@ class EnigmaMachine:
             plugboard_character = self.plugboard.encode(character)
             character = self.starting_rotor.encode_right_to_left(plugboard_character)
 
-            encoded = encoded + character
+            encoded = encoded + self.plugboard.encode(character)
 
         return encoded
 
