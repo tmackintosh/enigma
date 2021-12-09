@@ -47,6 +47,7 @@ class PlugLead:
         if character in self.mapping:
             location = self.mapping.index(character)
             
+            # Return the otherside of the physical wire
             if location == 1:
                 return self.mapping[0]
             else:

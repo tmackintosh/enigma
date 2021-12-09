@@ -4,18 +4,32 @@ class Rotor:
         Instantiates a Rotor object with the right mapping.
 
         @param mapping: str, 26 characters, the mapping of each letter in the alphabet in lexigraphical order
+        @param left_connection: Rotor object that is located physically to the left of this rotor
+        @param right_connection: Rotor object that is location physically to the right of this rotor
+        @param setting: numeric string value
         @returns newly instantiated Rotor object
         """
         notch = None
 
         # Method defense
+        if type(left_connection) != Rotor or type(right_connection) != Rotor:
+            raise TypeError("Connections must be another Rotor object")
+        if type(setting) != str:
+            raise TypeError("Setting must be a string")
+        if type(position) != str:
+            raise TypeError("Position must be a string")
         if type(mapping) != str:
             raise TypeError("Mapping must be a string")
+        if len(setting) != 2:
+            raise ValueError("Setting must have 2 characters")
         if len(mapping) != 26:
+            # A rotor could have a notch, in which case it is input through the mapping parameter
             mapping = mapping.split(" ")
 
-            if len(mapping) != 2:
+            if len(mapping) != 2 or len(mapping[0]) != 26:
                 raise ValueError("Mapping must be 26 characters long")
+            if len(mapping[1]) != 1:
+                raise ValueError("Notch must only be 1 character")
 
             notch = mapping[1]
             mapping = mapping[0]
@@ -27,6 +41,7 @@ class Rotor:
         self.mapping = mapping.upper()
         self.rotation = int(setting) - 1 + ord(position) - 65
 
+        # Not all rotors have notches
         if notch is not None:
             self.notch = ord(notch) - 65
 
