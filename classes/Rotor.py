@@ -1,3 +1,8 @@
+from helpers.length_assertion import length_assertion
+from helpers.lexigraphical_range_assertion import lexigraphical_range_assertion
+from helpers.type_assertion import type_assertion
+
+
 class Rotor:
     def __init__(self, mapping, left_connection = None, right_connection = None, setting = "01", position = "A"):
         """
@@ -12,31 +17,26 @@ class Rotor:
         notch = None
 
         # Method defense
-        if type(left_connection) != Rotor or type(right_connection) != Rotor:
-            raise TypeError("Connections must be another Rotor object")
-        if type(setting) != str:
-            raise TypeError("Setting must be a string")
-        if type(position) != str:
-            raise TypeError("Position must be a string")
-        if type(mapping) != str:
-            raise TypeError("Mapping must be a string")
-        if len(setting) != 2:
-            raise ValueError("Setting must have 2 characters")
+        type_assertion(left_connection, Rotor)
+        type_assertion(right_connection, Rotor)
+        type_assertion(setting, str)
+        type_assertion(position, str)
+        type_assertion(mapping, str)
+        length_assertion(setting, 2)
+
         if len(mapping) != 26:
             # A rotor could have a notch, in which case it is input through the mapping parameter
             mapping = mapping.split(" ")
 
-            if len(mapping) != 2 or len(mapping[0]) != 26:
-                raise ValueError("Mapping must be 26 characters long")
-            if len(mapping[1]) != 1:
-                raise ValueError("Notch must only be 1 character")
+            length_assertion(mapping, 2)
+            length_assertion(mapping[0], 26)
+            length_assertion(mapping[1], 1)
 
             notch = mapping[1]
             mapping = mapping[0]
 
         for character in mapping.upper():
-            if ord("A") > ord(character) or ord(character) > ord("Z"):
-                raise ValueError("Mapping can only contain A-Z characters")
+            lexigraphical_range_assertion(character, "A", "Z")
 
         self.mapping = mapping.upper()
         self.rotation = int(setting) - 1 + ord(position) - 65
@@ -59,15 +59,10 @@ class Rotor:
 
     def encode_right_to_left(self, character):
         # Method defense
-        if type(character) != str:
-            raise TypeError("Character must be a string")
-        if len(character) != 1:
-            raise ValueError("Character must be a single character")
-        
+        type_assertion(character, str)
+        length_assertion(character, 1)
         character = character.upper()
-
-        if ord("A") > ord(character) or ord(character) > ord("Z"):
-            raise ValueError("Character must be between A-Z")
+        lexigraphical_range_assertion(character, "A", "Z")
 
         index = ord(character) - 65 + self.rotation
 
@@ -88,15 +83,10 @@ class Rotor:
 
     def encode_left_to_right(self, character):
         # Method defense
-        if type(character) != str:
-            raise TypeError("Character must be a string")
-        if len(character) != 1:
-            raise ValueError("Character must be a single character")
-        
+        type_assertion(character, str)
+        length_assertion(character, 1)
         character = character.upper()
-
-        if ord("A") > ord(character) or ord(character) > ord("Z"):
-            raise ValueError("Character must be between A-Z")
+        lexigraphical_range_assertion(character, "A", "Z")
 
         character = chr(((ord(character) - 65 + self.rotation) % 26) + 65)
         index = (self.mapping.find(character) - self.rotation) % 26

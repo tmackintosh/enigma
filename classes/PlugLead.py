@@ -1,3 +1,8 @@
+from helpers.length_assertion import length_assertion
+from helpers.lexigraphical_range_assertion import lexigraphical_range_assertion
+from helpers.type_assertion import type_assertion
+
+
 class PlugLead:
     def __init__(self, mapping):
         """
@@ -9,16 +14,11 @@ class PlugLead:
         """
 
         # Method defense
-        if type(mapping) != str:
-            raise TypeError("Mapping should be a str")
-
+        type_assertion(mapping, str)
         mapping = mapping.upper()
-
         for character in mapping:
-            if ord("A") > ord(character) or ord(character) > ord("Z"):
-                raise ValueError("Character must be between A-Z")
-        if len(mapping) != 2:
-            raise ValueError("Mapping must have 2 characters.")
+            lexigraphical_range_assertion(character, "A", "Z")
+        length_assertion(mapping, 2)
         if mapping[0:1] == mapping[1:2]:
             raise ValueError("You cannot connect a character to itself.")
 
@@ -34,15 +34,10 @@ class PlugLead:
         """
 
         # Method defense
-        if type(character) != str:
-            raise TypeError("Character should be a str")
-
+        type_assertion(character, str)
         character = character.upper()
-
-        if len(character) != 1:
-            raise ValueError("Character must have a length of 1.")
-        if ord("A") > ord(character) or ord(character) > ord("Z"):
-            raise ValueError("Character must be between A-Z")
+        length_assertion(character, 1)
+        lexigraphical_range_assertion(character, "A", "Z")
 
         if character in self.mapping:
             location = self.mapping.index(character)

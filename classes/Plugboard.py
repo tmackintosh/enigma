@@ -1,5 +1,7 @@
 from classes.PlugLead import PlugLead
-
+from helpers.length_assertion import length_assertion
+from helpers.lexigraphical_range_assertion import lexigraphical_range_assertion
+from helpers.type_assertion import type_assertion
 class Plugboard:
     def __init__(self):
         """
@@ -18,8 +20,7 @@ class Plugboard:
         @returns nothing.
         """
         # Method defense
-        if type(lead) != PlugLead:
-            raise TypeError("Lead must be a PlugLead object.")
+        type_assertion(lead, PlugLead)
 
         for character in lead.mapping:
             self.mappings[character] = lead
@@ -33,15 +34,10 @@ class Plugboard:
         @returns a 1 character string representing how the input was encoded.
         """
         # Method defense
-        if type(character) != str:
-            raise TypeError("Character must be a string.")
-
+        type_assertion(character, str)
         character = character.upper()
-
-        if len(character) != 1:
-            raise ValueError("Character must have a length of 1.")
-        if ord("A") > ord(character) or ord(character) > ord("Z"):
-            raise ValueError("Character must be between A-Z")
+        length_assertion(character, 1)
+        lexigraphical_range_assertion(character, "A", "Z")
 
         character_lead = self.mappings.get(character)
         if character_lead:
