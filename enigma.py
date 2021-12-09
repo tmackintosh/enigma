@@ -109,24 +109,36 @@ class Plugboard:
 
 
 class Rotor:
-    def __init__(self, mapping, left_connection = None, right_connection = None):
+    def __init__(self, mapping, left_connection = None, right_connection = None, setting = "01", position = "A"):
         """
         Instantiates a Rotor object with the right mapping.
 
         @param mapping: str, 26 characters, the mapping of each letter in the alphabet in lexigraphical order
         @returns newly instantiated Rotor object
         """
+        notch = None
+
         # Method defense
         if type(mapping) != str:
             raise TypeError("Mapping must be a string")
         if len(mapping) != 26:
-            raise ValueError("Mapping must be 26 characters long")
+            mapping = mapping.split(" ")
+
+            if len(mapping) != 2:
+                raise ValueError("Mapping must be 26 characters long")
+
+            notch = mapping[1]
+            mapping = mapping[0]
+
         for character in mapping.upper():
             if ord("A") > ord(character) or ord(character) > ord("Z"):
                 raise ValueError("Mapping can only contain A-Z characters")
 
         self.mapping = mapping.upper()
-        self.rotation = 0
+        self.rotation = int(setting) - 1 + ord(position) - 65
+
+        if notch is not None:
+            self.notch = ord(notch) - 65
 
         self.left_connection = left_connection
         self.right_connection = right_connection
@@ -134,6 +146,9 @@ class Rotor:
         self.ring_setting = None
 
     def rotate(self):
+        if self.left_connection is not None and self.rotation == self.notch:
+            self.left_connection.rotate()
+
         self.rotation += 1
         self.rotation %= 26
 
@@ -189,14 +204,21 @@ class Rotor:
             return encoded_character
 
 class EnigmaMachine:
-    def __init__(self, rotors, reflector, ring_settings):
-        self.initialize_rotors(rotors, reflector)
-        self.initialize_ring_settings(ring_settings)
+    def __init__(self, rotors, reflector, ring_settings = "01 01 01", initial_positions = "A A A", plugboard_pairs = []):
+        ring_settings = ring_settings.split(" ")
+        rotors = rotors.split(" ")
+        initial_positions = initial_positions.split(" ")
 
-    def initialize_rotors(self, rotors, reflector):
-        self.right_rotor = rotor_from_name(rotors[2])
-        self.middle_rotor = rotor_from_name(rotors[1])
-        self.left_rotor = rotor_from_name(rotors[0])
+        self.initialize_rotors(rotors, reflector, ring_settings, initial_positions)
+        self.plugboard = Plugboard()
+
+        for plug in plugboard_pairs:
+            self.plugboard.add(plug)
+
+    def initialize_rotors(self, rotors, reflector, ring_settings, positions):
+        self.right_rotor = rotor_from_name(rotors[2], ring_settings[2], positions[2])
+        self.middle_rotor = rotor_from_name(rotors[1], ring_settings[1], positions[1])
+        self.left_rotor = rotor_from_name(rotors[0], ring_settings[0], positions[0])
 
         self.reflector = rotor_from_name(reflector)
 
@@ -209,18 +231,15 @@ class EnigmaMachine:
         self.left_rotor.left_connection = self.reflector
 
         self.reflector.right_connection = self.left_rotor
-
-    def initialize_ring_settings(self, ring_settings):
-        self.left_rotor.ring_setting = int(ring_settings[0])
-        self.middle_rotor.ring_setting = int(ring_settings[1])
-        self.middle_rotor.ring_setting = int(ring_settings[2])
+        self.starting_rotor = self.right_rotor
 
     def encode(self,text):
         encoded = ""
 
         for character in text:
             self.starting_rotor.rotate()
-            character = self.starting_rotor.encode_right_to_left(character)
+            plugboard_character = self.plugboard.encode(character)
+            character = self.starting_rotor.encode_right_to_left(plugboard_character)
 
             encoded = encoded + character
 
@@ -228,21 +247,21 @@ class EnigmaMachine:
 
 # method which returns a Rotor object
 # @param - name - name of the Rotor e.g. I or Gamma
-def rotor_from_name(name):
+def rotor_from_name(name, setting = "01", position = "A"):
     mappings = {
         "Beta": "LEYJVCNIXWPBQMDRTAKZGFUHOS",
         "Gamma": "FSOKANUERHMBTIYCWLQPZXVGJD",
-        "I": "EKMFLGDQVZNTOWYHXUSPAIBRCJ",
-        "II": "AJDKSIRUXBLHWTMCQGZNPYFVOE",
-        "III": "BDFHJLCPRTXVZNYEIWGAKMUSQO",
-        "IV": "ESOVPZJAYQUIRHXLNFTGKDCMWB",
-        "V": "VZBRGITYUPSDNHLXAWMJQOFECK",
+        "I": "EKMFLGDQVZNTOWYHXUSPAIBRCJ Q",
+        "II": "AJDKSIRUXBLHWTMCQGZNPYFVOE E",
+        "III": "BDFHJLCPRTXVZNYEIWGAKMUSQO V",
+        "IV": "ESOVPZJAYQUIRHXLNFTGKDCMWB J",
+        "V": "VZBRGITYUPSDNHLXAWMJQOFECK Z",
         "A": "EJMZALYXVBWFCRQUONTSPIKHGD",
         "B": "YRUHQSLDPXNGOKMIEBFZCWVJAT",
         "C": "FVPJIAOYEDRZXWGCTKUQSBNMHL"
     }
 
-    return Rotor(mappings[name])
+    return Rotor(mappings[name], setting = setting, position = position)
 
 # method with returns an fully set up enigma machine object
 # @param - rotors - string of the rotors used in this enigma machine e.g. "I II III"
@@ -251,11 +270,7 @@ def rotor_from_name(name):
 # @param - initial_positions - string of the starting positions of the rotors, from A-Z e.g. "A A Z"
 # @param - plugboard_pairs - list of the plugboard pairs to be used, default is an empty list
 def create_enigma_machine(rotors,reflector,ring_settings,initial_positions,plugboard_pairs=[]):
-    rotors = rotors.split(" ")
-    ring_settings = ring_settings.split(" ")
-
-    machine = EnigmaMachine(rotors, reflector, ring_settings)
-    print(machine.encode("A"))
+    return EnigmaMachine(rotors, reflector, ring_settings, initial_positions, plugboard_pairs)
 
 # Part 2 : functions to implement to demonstrate code breaking.
 # each function should return a list of all the possible answers
