@@ -37,9 +37,21 @@ class EnigmaMachine:
 
         for character in text:
             self.starting_rotor.rotate()
-            plugboard_character = self.plugboard.encode(character)
-            character = self.starting_rotor.encode_right_to_left(plugboard_character)
+            character = self.plugboard.encode(character)
+            current_rotor = self.starting_rotor
 
+            # Traverse to the left
+            while current_rotor.left_connection is not None:
+                character = current_rotor.encode_right_to_left(character)
+                current_rotor = current_rotor.left_connection
+
+            # Traverse to the right
+            while current_rotor.right_connection is not None:
+                character = current_rotor.encode_left_to_right(character)
+                current_rotor = current_rotor.right_connection
+
+            # Traverse the final rotor
+            character = current_rotor.encode_left_to_right(character)
             encoded = encoded + self.plugboard.encode(character)
 
         return encoded
