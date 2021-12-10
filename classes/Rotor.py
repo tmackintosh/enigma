@@ -16,8 +16,6 @@ class Rotor:
         @param position: character representing the initial rotation of the rotor
         @returns newly instantiated Rotor object
         """
-        notch = None
-
         # Method defense
         type_assertion(left_connection, Rotor, True)
         type_assertion(right_connection, Rotor, True)
@@ -27,6 +25,8 @@ class Rotor:
         length_assertion(setting, 2)
         numerical_assertion(setting)
 
+        self.notch = -1
+
         if len(mapping) != 26:
             # A rotor could have a notch, in which case it is input through the mapping parameter
             mapping = mapping.split(" ")
@@ -35,7 +35,7 @@ class Rotor:
             length_assertion(mapping[0], 26)
             length_assertion(mapping[1], 1)
 
-            notch = mapping[1]
+            self.notch = mapping[1]
             mapping = mapping[0]
 
         for character in mapping.upper():
@@ -45,8 +45,8 @@ class Rotor:
         self.rotation = int(setting) - 1 + ord(position) - 65
 
         # Not all rotors have notches
-        if notch is not None:
-            self.notch = ord(notch) - 65
+        if self.notch != -1:
+            self.notch = ord(self.notch) - 65
 
         self.left_connection = left_connection
         self.right_connection = right_connection

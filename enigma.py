@@ -167,14 +167,18 @@ def create_enigma_machine(rotors,reflector,ring_settings,initial_positions,plugb
 # code_one provides an example of how you might declare variables and the return type
 
 def code_one():
+    code = "DMEXBMKYCVPNQBEDHXVPZGKMTFFBJRPJTLHLCHOTKOYXGGHZ"
+    crib = "SECRETS"
     rotors = "Beta Gamma V"
-    reflector = "B"
-    ring_settings = "23 02 10"
-    # initial_positions are unknown
-    plugboard = ["VH", "PT", "ZG", "BJ", "EY", "FS"]
+    ring_settings = "04 02 14"
+    starting_positions = "M J M"
+    plugboard = ["KI", "XN", "FL"]
 
-    code = "CMFSUPKNCBMUYEQVVDYKLRQZTPUFHSWWAKTUGXMPAMYAFITXIJKMH"
-    crib = "UNIVERSITY"
+    possible_reflectors = ["A", "B", "C"]
+
+    for reflector in possible_reflectors:
+        machine = EnigmaMachine(rotors, reflector, ring_settings, starting_positions, plugboard)
+        print(machine.encode(code))
 
     return [code]
 
