@@ -42,7 +42,7 @@ class Rotor:
             lexigraphical_range_assertion(character, "A", "Z")
 
         self.mapping = mapping.upper()
-        self.rotation = int(setting) - 1 + ord(position) - 65
+        self.rotation = ord(position) - 65 - (int(setting) - 1)
 
         # Not all rotors have notches
         if self.notch != -1:
@@ -96,6 +96,7 @@ class Rotor:
         index %= 26
 
         encoded_character = self.mapping[index]
+
         return encoded_character
 
     def encode_left_to_right(self, character):
