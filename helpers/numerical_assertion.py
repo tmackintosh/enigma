@@ -1,5 +1,5 @@
-from type_assertion import type_assertion
-from lexigraphical_range_assertion import lexigraphical_range_assertion
+from helpers.type_assertion import type_assertion
+from helpers.lexigraphical_range_assertion import lexigraphical_range_assertion
 
 def numerical_assertion(string):
     type_assertion(string, str)
