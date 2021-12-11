@@ -109,12 +109,14 @@ class EnigmaMachine:
                 character = current_rotor.encode_right_to_left(character)
                 current_rotor = current_rotor.left_connection
 
+            character = current_rotor.encode_right_to_left(character)
+            current_rotor = current_rotor.right_connection
+
             # Traverse to the right
             while current_rotor.right_connection is not None:
                 character = current_rotor.encode_left_to_right(character)
                 current_rotor = current_rotor.right_connection
 
-            # Traverse the final rotor
             character = current_rotor.encode_left_to_right(character)
             encoded = encoded + self.plugboard.encode(character)
 

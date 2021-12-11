@@ -42,7 +42,8 @@ class Rotor:
             lexigraphical_range_assertion(character, "A", "Z")
 
         self.mapping = mapping.upper()
-        self.rotation = ord(position) - 65 - (int(setting) - 1)
+        self.position = ord(position) - 65
+        self.setting = int(setting) - 1
 
         # Not all rotors have notches
         if self.notch != -1:
@@ -59,11 +60,25 @@ class Rotor:
 
         @returns Nothing
         """
-        if self.left_connection is not None and self.rotation == self.notch:
+        if self.left_connection is not None and self.get_contact == self.notch:
             self.left_connection.rotate()
 
-        self.rotation += 1
-        self.rotation %= 26
+        self.position += 1
+        self.position %= 26
+
+    def get_contact(self, character):
+        index = ord(character) - 65
+        index += self.position
+        index -= self.setting
+        index %= 26
+        return index
+
+    def get_pin(self, character):
+        index = ord(character) - 65
+        index -= self.position
+        index += self.setting
+        index %= 26
+        return chr(index + 65)
 
     def encode_right_to_left(self, character):
         """
@@ -83,21 +98,10 @@ class Rotor:
         character = character.upper()
         lexigraphical_range_assertion(character, "A", "Z")
 
-        index = ord(character) - 65
-
-        # Adjust for our own rotation
-        index += self.rotation
-
-        # Adjust for the rotation of the input rotor
-        if self.right_connection:
-            index -= self.right_connection.rotation
-
-        # Constrain to the rotor's circle
-        index %= 26
+        index = self.get_contact(character)
 
         encoded_character = self.mapping[index]
-
-        return encoded_character
+        return self.get_pin(encoded_character)
 
     def encode_left_to_right(self, character):
         """
@@ -117,8 +121,7 @@ class Rotor:
         character = character.upper()
         lexigraphical_range_assertion(character, "A", "Z")
 
-        character = chr(((ord(character) - 65 + self.rotation) % 26) + 65)
-        index = (self.mapping.find(character) - self.rotation) % 26
-
+        index = self.get_contact(character)
         encoded_character = chr(index + 65)
-        return encoded_character
+        pin = self.mapping.index(encoded_character)
+        return self.get_pin(chr(pin + 65))
