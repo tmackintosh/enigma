@@ -101,6 +101,7 @@ class Rotor:
         index = self.get_contact(character)
 
         encoded_character = self.mapping[index]
+        # print("Output", self.get_pin(encoded_character))
         return self.get_pin(encoded_character)
 
     def encode_left_to_right(self, character):
@@ -124,4 +125,5 @@ class Rotor:
         index = self.get_contact(character)
         encoded_character = chr(index + 65)
         pin = self.mapping.index(encoded_character)
+        # print("Output", self.get_pin(chr(pin + 65)))
         return self.get_pin(chr(pin + 65))

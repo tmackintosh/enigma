@@ -118,6 +118,7 @@ class EnigmaMachine:
                 current_rotor = current_rotor.right_connection
 
             character = current_rotor.encode_left_to_right(character)
+            # print("Adding", self.plugboard.encode(character))
             encoded = encoded + self.plugboard.encode(character)
 
         return encoded
