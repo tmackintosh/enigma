@@ -190,7 +190,26 @@ def code_one():
     return possible_answers
 
 def code_two():
-    return []
+    code = "CMFSUPKNCBMUYEQVVDYKLRQZTPUFHSWWAKTUGXMPAMYAFITXIJKMH"
+    crib = "UNIVERSITY"
+    rotors = "Beta I III"
+    ring_settings = "23 02 10"
+    plugboard = ["VH", "PT", "ZG", "BJ", "EY", "FS"]
+    reflector = "B"
+
+    possible_answers = []
+
+    for first_position in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+        for second_position in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+            for third_position in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+                starting_positions = first_position + " " + second_position + " " + third_position
+                machine = EnigmaMachine(rotors, reflector, ring_settings, starting_positions, plugboard)
+                encrypted = machine.encode(code)
+
+                if crib in encrypted:
+                    possible_answers.append(encrypted)
+
+    return possible_answers
 
 def code_three():
     return []
