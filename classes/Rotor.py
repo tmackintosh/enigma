@@ -60,7 +60,7 @@ class Rotor:
 
         @returns Nothing
         """
-        if self.left_connection is not None and self.get_contact == self.notch:
+        if self.left_connection is not None and self.position == self.notch:
             self.left_connection.rotate()
 
         self.position += 1
