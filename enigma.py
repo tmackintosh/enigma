@@ -1,11 +1,12 @@
 from classes.PlugLead import PlugLead
 from classes.Plugboard import Plugboard
 from classes.Rotor import Rotor
+
 from helpers.length_assertion import length_assertion
 from helpers.lexigraphical_range_assertion import lexigraphical_range_assertion
 from helpers.numerical_assertion import numerical_assertion
-
 from helpers.type_assertion import type_assertion
+from helpers.is_even import is_even
 
 class EnigmaMachine:
     def __init__(self, rotors, reflector, ring_settings = "01 01 01", initial_positions = "A A A", plugboard_pairs = []):
@@ -212,7 +213,30 @@ def code_two():
     return possible_answers
 
 def code_three():
-    return []
+    code = "ABSKJAKKMRITTNYURBJFWQGRSGNNYJSDRYLAPQWIAGKJYEPCTAGDCTHLCDRZRFZHKNRSDLNPFPEBVESHPY"
+    crib = "THOUSANDS"
+    starting_positions = "E M Y"
+    plugboard = ["FH", "TS", "BE", "UQ", "KD", "AL"]
+
+    potential_rotors = ["Alpha", "Beta", "Gamma", "II", "IV"]
+    potential_reflectors = ["A", "B", "C"]
+    
+    for first_setting in range (1, 26):
+        if not is_even(first_setting):
+            continue
+
+        for second_setting in range (1, 26):
+            if not is_even(second_setting):
+                continue
+
+            for third_setting in range (1, 26):
+                if not is_even(third_setting):
+                    continue
+
+                for rotor in potential_rotors:
+                    for reflector in potential_reflectors:
+                        machine = EnigmaMachine(rotor)
+                
 
 def code_four():
     return []
