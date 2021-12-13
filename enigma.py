@@ -178,12 +178,16 @@ def code_one():
     plugboard = ["KI", "XN", "FL"]
 
     possible_reflectors = ["A", "B", "C"]
+    possible_answers = []
 
     for reflector in possible_reflectors:
         machine = EnigmaMachine(rotors, reflector, ring_settings, starting_positions, plugboard)
-        print(machine.encode(code))
+        encrypted = machine.encode(code)
 
-    return [code]
+        if crib in encrypted:
+            possible_answers.append(encrypted)
+
+    return possible_answers
 
 def code_two():
     return []
