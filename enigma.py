@@ -1,3 +1,5 @@
+import itertools
+
 from classes.PlugLead import PlugLead
 from classes.Plugboard import Plugboard
 from classes.Rotor import Rotor
@@ -7,7 +9,8 @@ from helpers.lexigraphical_range_assertion import lexigraphical_range_assertion
 from helpers.numerical_assertion import numerical_assertion
 from helpers.type_assertion import type_assertion
 from helpers.is_even import is_even
-from helpers.get_rotors import get_rotors
+from helpers.get_setting import get_setting
+from helpers.get_string_form import get_string_form
 
 class EnigmaMachine:
     def __init__(self, rotors, reflector, ring_settings = "01 01 01", initial_positions = "A A A", plugboard_pairs = []):
@@ -120,7 +123,6 @@ class EnigmaMachine:
                 current_rotor = current_rotor.right_connection
 
             character = current_rotor.encode_left_to_right(character)
-            # print("Adding", self.plugboard.encode(character))
             encoded = encoded + self.plugboard.encode(character)
 
         return encoded
@@ -219,7 +221,7 @@ def code_three():
     starting_positions = "E M Y"
     plugboard = ["FH", "TS", "BE", "UQ", "KD", "AL"]
 
-    potential_rotors = get_rotors(["Alpha", "Beta", "Gamma", "II", "IV"])
+    potential_rotors = list(itertools.permutations(["Beta", "Gamma", "II", "IV"], 3))
     potential_reflectors = ["A", "B", "C"]
 
     potential_answers = []
@@ -236,11 +238,11 @@ def code_three():
                 if not is_even(third_setting):
                     continue
 
-                ring_settings = first_setting + " " + second_setting + " " + third_setting
+                ring_settings = get_setting(first_setting) + " " + get_setting(second_setting) + " " + get_setting(third_setting)
 
-                for rotors in potential_rotors:
-                    for reflector in potential_reflectors:
-                        machine = EnigmaMachine(rotors, reflector, ring_settings, starting_positions, plugboard)
+                for reflector in potential_reflectors:
+                    for rotors in potential_rotors:
+                        machine = EnigmaMachine(get_string_form(rotors), reflector, ring_settings, starting_positions, plugboard)
                         encoded = machine.encode(code)
 
                         if crib in encoded:
