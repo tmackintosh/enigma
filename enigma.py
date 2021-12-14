@@ -7,6 +7,7 @@ from helpers.lexigraphical_range_assertion import lexigraphical_range_assertion
 from helpers.numerical_assertion import numerical_assertion
 from helpers.type_assertion import type_assertion
 from helpers.is_even import is_even
+from helpers.get_rotors import get_rotors
 
 class EnigmaMachine:
     def __init__(self, rotors, reflector, ring_settings = "01 01 01", initial_positions = "A A A", plugboard_pairs = []):
@@ -218,8 +219,10 @@ def code_three():
     starting_positions = "E M Y"
     plugboard = ["FH", "TS", "BE", "UQ", "KD", "AL"]
 
-    potential_rotors = ["Alpha", "Beta", "Gamma", "II", "IV"]
+    potential_rotors = get_rotors(["Alpha", "Beta", "Gamma", "II", "IV"])
     potential_reflectors = ["A", "B", "C"]
+
+    potential_answers = []
     
     for first_setting in range (1, 26):
         if not is_even(first_setting):
@@ -233,9 +236,17 @@ def code_three():
                 if not is_even(third_setting):
                     continue
 
-                for rotor in potential_rotors:
+                ring_settings = first_setting + " " + second_setting + " " + third_setting
+
+                for rotors in potential_rotors:
                     for reflector in potential_reflectors:
-                        machine = EnigmaMachine(rotor)
+                        machine = EnigmaMachine(rotors, reflector, ring_settings, starting_positions, plugboard)
+                        encoded = machine.encode(code)
+
+                        if crib in encoded:
+                            potential_answers.append(encoded)
+
+    return potential_answers
                 
 
 def code_four():

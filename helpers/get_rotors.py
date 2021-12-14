@@ -1,4 +1,5 @@
 import math
+import itertools
 
 def get_binary(number):
     string = ""
@@ -12,9 +13,6 @@ def get_binary(number):
         number = math.floor(number / 2)
 
     return string
-
-def get_permutations(rotors):
-    return rotors
 
 def get_rotors(rotors):
     if len(rotors) < 3:
@@ -38,6 +36,6 @@ def get_rotors(rotors):
 
         possible_rotors.append(rotor_combo)
 
-    return possible_rotors
+    return list(itertools.permutations(possible_rotors))
 
 print(get_rotors(["I", "II", "III", "IV"]))
