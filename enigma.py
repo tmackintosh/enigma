@@ -252,7 +252,35 @@ def code_three():
                 
 
 def code_four():
-    return []
+    code = "SDNTVTPHRBNWTLMZTQKZGADDQYPFNHBPNHCQGBGMZPZLUAVGDQVYRBFYYEIXQWVTHXGNW"
+    crib = "TUTOR"
+
+    rotors = "V III IV"
+    reflector = "A"
+    ring_settings = "24 12 10"
+    starting_position = "S W U"
+    plugboard = ["WP", "RJ", "VF", "HN", "CG", "BS"]
+
+    potential_answers = []
+
+    for first_lead in "DEKLMOQTUXYZ":
+        for second_lead in "DEKLMOQTUXYZ":
+            if first_lead == second_lead:
+                continue
+
+            plugboard.append("A" + first_lead)
+            plugboard.append("I" + second_lead)
+
+            machine = EnigmaMachine(rotors, reflector, ring_settings, starting_position, plugboard)
+            encoded = machine.encode(code)
+
+            if crib in encoded:
+                potential_answers.append(encoded)
+
+            plugboard.remove("A" + first_lead)
+            plugboard.remove("I" + second_lead)
+
+    return potential_answers
 
 def code_five():
     return []
