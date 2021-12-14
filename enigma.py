@@ -71,27 +71,33 @@ class EnigmaMachine:
         rotors = rotors.split(" ")
         positions = positions.split(" ")
 
-        if len(ring_settings) != 3 or len(rotors) != 3 or len(positions) != 3:
-            raise ValueError("You must provide the same number of arguments for each rotor, setting and position.")
+        if len(rotors) != len(ring_settings) or len(rotors) != len(positions) or len(ring_settings) != len(positions):
+            raise ValueError("You must provide the same number of inputs for each rotor")
 
         # Instantiate rotors
         self.right_rotor = rotor_from_name(rotors[2], ring_settings[2], positions[2])
         self.middle_rotor = rotor_from_name(rotors[1], ring_settings[1], positions[1])
         self.left_rotor = rotor_from_name(rotors[0], ring_settings[0], positions[0])
 
+        rotor_objects = []
         self.reflector = rotor_from_name(reflector)
 
-        # Set relative rotor positions
-        self.right_rotor.left_connection = self.middle_rotor
+        for i in range (0, len(rotors)):
+            new_rotor = rotor_from_name(rotors[i], ring_settings[i], positions[i])
+            
+            if i == 0:
+                new_rotor.left_connection = self.reflector
+                self.reflector.right_connection = new_rotor
+            else:
+                left_rotor = rotor_objects[i - 1]
 
-        self.middle_rotor.right_connection = self.right_rotor
-        self.middle_rotor.left_connection = self.left_rotor
+                new_rotor.left_connection = rotor_objects[i - 1]
+                left_rotor.right_connection = new_rotor
 
-        self.left_rotor.right_connection = self.middle_rotor
-        self.left_rotor.left_connection = self.reflector
+            rotor_objects.append(new_rotor)
 
-        self.reflector.right_connection = self.left_rotor
-        self.starting_rotor = self.right_rotor
+        self.starting_rotor = rotor_objects[len(rotor_objects) - 1]
+        self.reflector.right_connection = rotor_objects[0]
 
     def encode(self,text):
         """
