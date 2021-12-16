@@ -31,12 +31,15 @@ class EnigmaMachine:
         type_assertion(reflector, str)
         type_assertion(ring_settings, str)
         type_assertion(initial_positions, str)
+        type_assertion(plugboard_pairs, list)
 
-        self.initialize_rotors(rotors, reflector, ring_settings, initial_positions)
-        self.initialize_plugboard(plugboard_pairs)
+        self.__initialize_rotors(rotors, reflector, ring_settings, initial_positions)
+        self.__initialize_plugboard(plugboard_pairs)
 
-    def initialize_plugboard(self, plugs):
+    def __initialize_plugboard(self, plugs):
         """
+        Private method
+
         Sets the object's plugboard attribute to a new plugboard object configured
         with the leads as layed out in the plugs parameter.
 
@@ -44,13 +47,15 @@ class EnigmaMachine:
 
         @returns nothing
         """
-        self.plugboard = Plugboard()
+        self.plugboard: Plugboard = Plugboard()
 
         for plug in plugs:
             self.plugboard.add(PlugLead(plug))
 
-    def initialize_rotors(self, rotors, reflector, ring_settings, positions):
+    def __initialize_rotors(self, rotors, reflector, ring_settings, positions):
         """
+        Private method
+
         Sets the object's rotor configuration as well as their initial status.
 
         Also tags adjacent rotors as attributes to rotors. For example, the
@@ -163,6 +168,7 @@ def rotor_from_name(name, setting = "01", position = "A", mapping = None):
     if mapping is None:
         rotor_mapping = mappings.get(name)
     else:
+        # In case of mapping override through custom rotor
         rotor_mapping = mapping
 
     if rotor_mapping is None:
@@ -210,13 +216,15 @@ def code_two():
     ring_settings = "23 02 10"
     plugboard = ["VH", "PT", "ZG", "BJ", "EY", "FS"]
     reflector = "B"
+    possible_positions = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
     possible_answers = []
 
-    for first_position in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
-        for second_position in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
-            for third_position in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+    for first_position in possible_positions:
+        for second_position in possible_positions:
+            for third_position in possible_positions:
                 starting_positions = first_position + " " + second_position + " " + third_position
+
                 machine = EnigmaMachine(rotors, reflector, ring_settings, starting_positions, plugboard)
                 encrypted = machine.encode(code)
 
@@ -231,7 +239,7 @@ def code_three():
     starting_positions = "E M Y"
     plugboard = ["FH", "TS", "BE", "UQ", "KD", "AL"]
 
-    potential_rotors = list(itertools.permutations(["Beta", "Gamma", "II", "IV"], 3))
+    potential_rotors = ["Beta", "Gamma", "II", "IV"]
     potential_reflectors = ["A", "B", "C"]
 
     potential_answers = []
@@ -248,11 +256,16 @@ def code_three():
                 if not is_even(third_setting):
                     continue
 
+                # As machine constructor only accepts a string for ring settings
                 ring_settings = get_setting(first_setting) + " " + get_setting(second_setting) + " " + get_setting(third_setting)
 
                 for reflector in potential_reflectors:
-                    for rotors in potential_rotors:
-                        machine = EnigmaMachine(get_string_form(rotors), reflector, ring_settings, starting_positions, plugboard)
+                    # Any combination of the rotors can be swapped around into any position, so permutations are necessary
+                    for rotors in list(itertools.permutations(potential_rotors, 3)):
+                        # Machine constructor only accepts a string for rotors
+                        rotors_string_form = get_string_form(rotors)
+
+                        machine = EnigmaMachine(rotors_string_form, reflector, ring_settings, starting_positions, plugboard)
                         encoded = machine.encode(code)
 
                         if crib in encoded:
@@ -270,14 +283,20 @@ def code_four():
     ring_settings = "24 12 10"
     starting_position = "S W U"
     plugboard = ["WP", "RJ", "VF", "HN", "CG", "BS"]
+    
+    # You cannot plug a lead into a space already in the plugboard
+    possible_leads = "DEKLMOQTUXYZ"
 
     potential_answers = []
 
-    for first_lead in "DEKLMOQTUXYZ":
-        for second_lead in "DEKLMOQTUXYZ":
+    for first_lead in possible_leads:
+        for second_lead in possible_leads:
+
+            # You cannot plug a lead into itself
             if first_lead == second_lead:
                 continue
 
+            # We know the two possible ones pair into A and I
             plugboard.append("A" + first_lead)
             plugboard.append("I" + second_lead)
 
@@ -287,6 +306,7 @@ def code_four():
             if crib in encoded:
                 potential_answers.append(encoded)
 
+            # Reset the plugboard for next iteration
             plugboard.remove("A" + first_lead)
             plugboard.remove("I" + second_lead)
 
@@ -300,35 +320,47 @@ def code_five():
     ring_settings = "06 18 07"
     starting_positions = "A J L"
     plugboard = ["UG", "IE", "PO", "NX", "WT"]
+    possible_wires = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
     possible_reflectors = ["B"]
     potential_answers = []
 
     for reflector in possible_reflectors:
+        # Create an "original" rotor we can reference any changes from
         reflector_rotor = rotor_from_name(reflector)
 
-        old_mapping = "" + reflector_rotor.mapping
-        # old_combinations = list(itertools.permutations("AIRQ", 4))
-        old_combinations = list(itertools.permutations("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 4))
+        # Store a value that we can reset the rotor back to after each iteration
+        old_mapping = reflector_rotor.mapping
+
+        permutations = list(itertools.permutations(possible_wires, 4))
         
-        for permutation in old_combinations:
-            if ord(permutation[0]) > ord(permutation[1]) or ord(permutation[2]) > ord(permutation[3]) or ord(permutation[0]) > ord(permutation[2]) or ord(permutation[1]) > ord(permutation[3]):
+        for permutation in permutations:
+            # We can remove the vast majority of permutations as we know logically they will result in the
+            # same encryption, for example:
+            # We know that swapping A with B is the same as swapping B with A
+            if ord(permutation[0]) > ord(permutation[1]) or ord(permutation[2]) > ord(permutation[3]):
+                continue
+            # We know that swapping A with B, and C with D, is the same as swapping C with D, and A with B
+            if ord(permutation[0]) > ord(permutation[2]) or ord(permutation[1]) > ord(permutation[3]):
                 continue
 
             new_mapping = old_mapping
             machine = EnigmaMachine(rotors, reflector, ring_settings, starting_positions, plugboard)
 
-            inverse_permutation = []
+            # By swapping wire inputs around, we also need to swap wire outputs around
+            output_permutation = []
 
             for character in permutation:
-                inverse = old_mapping[ord(character) - 65]
-                inverse_permutation.append(old_mapping[ord(character) - 65])
+                # Find the output from each wire to swap them
+                output_permutation.append(old_mapping[ord(character) - 65])
 
+            # Swap the wires in each mapping
             new_mapping = swap_characters(new_mapping, permutation[0], permutation[2])
             new_mapping = swap_characters(new_mapping, permutation[1], permutation[3])
-            new_mapping = swap_characters(new_mapping, inverse_permutation[0], inverse_permutation[2])
-            new_mapping = swap_characters(new_mapping, inverse_permutation[1], inverse_permutation[3])
+            new_mapping = swap_characters(new_mapping, output_permutation[0], output_permutation[2])
+            new_mapping = swap_characters(new_mapping, output_permutation[1], output_permutation[3])
             
+            # Update the machine with the new reflector
             machine.reflector.mapping = new_mapping
             encoded = machine.encode(code)
 
