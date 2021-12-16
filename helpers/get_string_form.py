@@ -10,11 +10,14 @@ def get_string_form(rotors):
     """
     
     # Function defense
-    type_assertion(rotors, str)
+    type_assertion(rotors, tuple)
 
     string = ""
 
     for rotor in rotors:
+        # Function defense
+        type_assertion(rotor, str)
+
         if string == "":
             string = rotor
         else:

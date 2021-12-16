@@ -10,7 +10,7 @@ def is_even(number):
     """
 
     # Function defense
-    type_assertion(number, str)
+    type_assertion(number, int)
 
     string = str(number)
     
