@@ -7,6 +7,7 @@ from classes.Rotor import Rotor
 from helpers.length_assertion import length_assertion
 from helpers.lexigraphical_range_assertion import lexigraphical_range_assertion
 from helpers.numerical_assertion import numerical_assertion
+from helpers.swap_characters import swap_characters
 from helpers.type_assertion import type_assertion
 from helpers.is_even import is_even
 from helpers.get_setting import get_setting
@@ -74,17 +75,14 @@ class EnigmaMachine:
         if len(rotors) != len(ring_settings) or len(rotors) != len(positions) or len(ring_settings) != len(positions):
             raise ValueError("You must provide the same number of inputs for each rotor")
 
-        # Instantiate rotors
-        self.right_rotor = rotor_from_name(rotors[2], ring_settings[2], positions[2])
-        self.middle_rotor = rotor_from_name(rotors[1], ring_settings[1], positions[1])
-        self.left_rotor = rotor_from_name(rotors[0], ring_settings[0], positions[0])
-
         rotor_objects = []
         self.reflector = rotor_from_name(reflector)
 
+        # Instantiate rotors
         for i in range (0, len(rotors)):
             new_rotor = rotor_from_name(rotors[i], ring_settings[i], positions[i])
             
+            # Create rotor links
             if i == 0:
                 new_rotor.left_connection = self.reflector
                 self.reflector.right_connection = new_rotor
@@ -137,7 +135,7 @@ class EnigmaMachine:
 # @param - name - name of the Rotor e.g. I or Gamma
 # @param - setting - initial setting for rotor
 # @param - position - initial position of rotor
-def rotor_from_name(name, setting = "01", position = "A"):
+def rotor_from_name(name, setting = "01", position = "A", mapping = None):
     # Method defense
     type_assertion(name, str)
     type_assertion(setting, str)
@@ -160,11 +158,17 @@ def rotor_from_name(name, setting = "01", position = "A"):
         "C": "FVPJIAOYEDRZXWGCTKUQSBNMHL"
     }
 
-    rotor_mapping = mappings.get(name)
+    rotor_mapping = None
+
+    if mapping is None:
+        rotor_mapping = mappings.get(name)
+    else:
+        rotor_mapping = mapping
+
     if rotor_mapping is None:
         raise ValueError("Name of mapping must be a valid rotor name, got", name)
 
-    return Rotor(mappings[name], setting = setting, position = position)
+    return Rotor(rotor_mapping, setting = setting, position = position)
 
 # method with returns an fully set up enigma machine object
 # @param - rotors - string of the rotors used in this enigma machine e.g. "I II III"
@@ -289,7 +293,50 @@ def code_four():
     return potential_answers
 
 def code_five():
-    return []
+    code = "HWREISXLGTTBYVXRCWWJAKZDTVZWKBDJPVQYNEQIOTIFX"
+    crib = "INSTAGRAM"
+
+    rotors = "V II IV"
+    ring_settings = "06 18 07"
+    starting_positions = "A J L"
+    plugboard = ["UG", "IE", "PO", "NX", "WT"]
+
+    possible_reflectors = ["B"]
+    potential_answers = []
+
+    for reflector in possible_reflectors:
+        reflector_rotor = rotor_from_name(reflector)
+
+        old_mapping = "" + reflector_rotor.mapping
+        # old_combinations = list(itertools.permutations("AIRQ", 4))
+        old_combinations = list(itertools.permutations("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 4))
+        
+        for permutation in old_combinations:
+            if ord(permutation[0]) > ord(permutation[1]) or ord(permutation[2]) > ord(permutation[3]) or ord(permutation[0]) > ord(permutation[2]) or ord(permutation[1]) > ord(permutation[3]):
+                continue
+
+            new_mapping = old_mapping
+            machine = EnigmaMachine(rotors, reflector, ring_settings, starting_positions, plugboard)
+
+            inverse_permutation = []
+
+            for character in permutation:
+                inverse = old_mapping[ord(character) - 65]
+                inverse_permutation.append(old_mapping[ord(character) - 65])
+
+            new_mapping = swap_characters(new_mapping, permutation[0], permutation[2])
+            new_mapping = swap_characters(new_mapping, permutation[1], permutation[3])
+            new_mapping = swap_characters(new_mapping, inverse_permutation[0], inverse_permutation[2])
+            new_mapping = swap_characters(new_mapping, inverse_permutation[1], inverse_permutation[3])
+            
+            machine.reflector.mapping = new_mapping
+            encoded = machine.encode(code)
+
+            if crib in encoded:
+                potential_answers.append(encoded)
+
+    return potential_answers
+
 
 if __name__ == "__main__":
     # You can use this section to test your code.  However, remember that your code
