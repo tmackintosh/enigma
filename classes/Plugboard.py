@@ -25,6 +25,13 @@ class Plugboard:
         for character in lead.mapping:
             self.mappings[character] = lead
 
+    def remove(self, lead):
+        # Method defense
+        type_assertion(lead, PlugLead)
+
+        for character in lead.mapping:
+            self.mappings[character] = None
+
     def encode(self, character):
         """
         Encodes a character by the current plugboard leads.

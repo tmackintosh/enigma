@@ -1,9 +1,7 @@
-file = open("data/bigrams.txt")
-
-def bigram_fitness(code):
+def n_gram_fitness(code, file):
     score = 0
 
-    with open("data/bigrams.txt") as fp:
+    with open(file) as fp:
         for i, line in enumerate(fp):
             sections = line.split(",")
             

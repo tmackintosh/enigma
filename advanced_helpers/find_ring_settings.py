@@ -1,6 +1,6 @@
 from enigma import EnigmaMachine
 from advanced_helpers.optimise_ring_setting import optimise_rotor_setting
-from advanced_helpers.bigram_fitness import bigram_fitness
+from advanced_helpers.n_gram_fitness import n_gram_fitness
 
 best_settings = []
 
@@ -18,7 +18,10 @@ def find_ring_settings(config, code):
         machine.starting_rotor.left_connection.setting = optimal_rotor_setting_2[1]
 
         encoded = machine.encode(code)
-        fitness = bigram_fitness(encoded)
+
+        file = "data/bigrams.txt"
+        fitness = n_gram_fitness(encoded, file)
+        
         state = [enigma_state[0], enigma_state[2], [optimal_rotor_setting_1[1], optimal_rotor_setting_2[1]], fitness]
         best_settings.append(state)
 

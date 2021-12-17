@@ -16,7 +16,11 @@ def get_string_form(rotors):
 
     for rotor in rotors:
         # Function defense
-        type_assertion(rotor, str)
+        if type(rotor) != str:
+            try:
+                rotor = str(rotor)
+            except:
+                raise ValueError("Inputs must be iterable, got " + type(rotor))
 
         if string == "":
             string = rotor

@@ -1,11 +1,15 @@
-import collections
+import math
+from advanced_helpers.find_plugboard import find_plugboard
 
-from advanced_helpers.bigram_fitness import bigram_fitness
-from advanced_helpers.find_ring_settings import find_ring_settings
-from advanced_helpers.optimise_ring_setting import optimise_rotor_setting
-from advanced_helpers.find_rotor_configuration import find_rotor_configuration
+from advanced_helpers.n_gram_fitness import n_gram_fitness
+from classes.PlugLead import PlugLead
+
 from advanced_helpers.get_best_rotors import get_best_rotors
-from helpers.get_string_form import get_string_form
+from advanced_helpers.find_rotor_configuration import find_rotor_configuration
+from advanced_helpers.find_ring_settings import find_ring_settings
+
+from helpers.get_setting import get_setting
+
 from enigma import EnigmaMachine
 
 code = "OZLUDYAKMGMXVFVARPMJIKVWPMBVWMOIDHYPLAYUWGBZFAFAFUQFZQISLEZMYPVBRDDLAGIHIFUJDFADORQOOMIZPYXDCBPWDSSNUSYZTJEWZPWFBWBMIEQXRFASZLOPPZRJKJSPPSTXKPUWYSKNMZZLHJDXJMMMDFODIHUBVCXMNICNYQBNQODFQLOGPZYXRJMTLMRKQAUQJPADHDZPFIKTQBFXAYMVSZPKXIQLOQCVRPKOBZSXIUBAAJBRSNAFDMLLBVSYXISFXQZKQJRIQHOSHVYJXIFUZRMXWJVWHCCYHCXYGRKMKBPWRDBXXRGABQBZRJDVHFPJZUSEBHWAEOGEUQFZEEBDCWNDHIAQDMHKPRVYHQGRDYQIOEOLUBGBSNXWPZCHLDZQBWBEWOCQDBAFGUVHNGCIKXEIZGIZHPJFCTMNNNAUXEVWTWACHOLOLSLTMDRZJZEVKKSSGUUTHVXXODSKTFGRUEIIXVWQYUIPIDBFPGLBYXZTCOQBCAHJYNSGDYLREYBRAKXGKQKWJEKWGAPTHGOMXJDSQKYHMFGOLXBSKVLGNZOAXGVTGXUIVFTGKPJU"
@@ -36,3 +40,5 @@ top_ring_settings = [
     ['III II V', 'K R N', [16, 16], -1584.0361097100006], 
     ['II III V', 'L S I', [23, 20], -1541.8206898830003]    ]
 
+best_plugboard = find_plugboard(top_ring_settings, code)
+print(best_plugboard)
