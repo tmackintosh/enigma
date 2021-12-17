@@ -1,31 +1,26 @@
-from advanced_helpers.index_of_coincidence import index_of_coincidence
+from enigma import EnigmaMachine
+from advanced_helpers.optimise_ring_setting import optimise_rotor_setting
+from advanced_helpers.bigram_fitness import bigram_fitness
+
+best_settings = []
 
 def fitness_value(a):
-    return a[2]
+    return a[3]
 
-def optimise_rotor_setting(machine, rotor_number, code):
-    rotor = machine.starting_rotor
-    starting_position = rotor.position
+def find_ring_settings(config, code):
+    for enigma_state in config:
+        machine = EnigmaMachine(enigma_state[0], "A", initial_positions = enigma_state[2])
 
-    top_fitness_states = []
+        optimal_rotor_setting_1 = optimise_rotor_setting(machine, 1, code)[0]
+        machine.starting_rotor.setting = optimal_rotor_setting_1[1]
 
-    while rotor_number > 1:
-        rotor = rotor.left_connection
-        rotor_number -= 1
+        optimal_rotor_setting_2 = optimise_rotor_setting(machine, 2, code)[0]
+        machine.starting_rotor.left_connection.setting = optimal_rotor_setting_2[1]
 
-    for i in range (0, 26):
-        rotor.setting = i
-        rotor.position = (starting_position + i) % 26
-        
-        encrypted = machine.encode(code)
-        fitness = index_of_coincidence(encrypted)
+        encoded = machine.encode(code)
+        fitness = bigram_fitness(encoded)
+        state = [enigma_state[0], enigma_state[2], [optimal_rotor_setting_1[1], optimal_rotor_setting_2[1]], fitness]
+        best_settings.append(state)
 
-        state = [rotor_number, i, fitness]
-
-        top_fitness_states.append(state)
-        top_fitness_states.sort(key = fitness_value, reverse = True)
-
-        if len(top_fitness_states) > 5:
-            top_fitness_states.pop()
-
-    return top_fitness_states
+    best_settings.sort(key = fitness_value)
+    return best_settings
