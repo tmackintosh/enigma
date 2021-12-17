@@ -1,46 +1,19 @@
-import itertools
-import math
-
-from advanced_helpers.index_of_coincidence import index_of_coincidence
+from advanced_helpers.find_ring_settings import optimise_rotor_setting
+from advanced_helpers.find_rotor_configuration import find_rotor_configuration
 from enigma import EnigmaMachine
 
 code = "OZLUDYAKMGMXVFVARPMJIKVWPMBVWMOIDHYPLAYUWGBZFAFAFUQFZQISLEZMYPVBRDDLAGIHIFUJDFADORQOOMIZPYXDCBPWDSSNUSYZTJEWZPWFBWBMIEQXRFASZLOPPZRJKJSPPSTXKPUWYSKNMZZLHJDXJMMMDFODIHUBVCXMNICNYQBNQODFQLOGPZYXRJMTLMRKQAUQJPADHDZPFIKTQBFXAYMVSZPKXIQLOQCVRPKOBZSXIUBAAJBRSNAFDMLLBVSYXISFXQZKQJRIQHOSHVYJXIFUZRMXWJVWHCCYHCXYGRKMKBPWRDBXXRGABQBZRJDVHFPJZUSEBHWAEOGEUQFZEEBDCWNDHIAQDMHKPRVYHQGRDYQIOEOLUBGBSNXWPZCHLDZQBWBEWOCQDBAFGUVHNGCIKXEIZGIZHPJFCTMNNNAUXEVWTWACHOLOLSLTMDRZJZEVKKSSGUUTHVXXODSKTFGRUEIIXVWQYUIPIDBFPGLBYXZTCOQBCAHJYNSGDYLREYBRAKXGKQKWJEKWGAPTHGOMXJDSQKYHMFGOLXBSKVLGNZOAXGVTGXUIVFTGKPJU"
-
 rotors = ["I", "II", "III", "IV", "V"]
-permutations = list(itertools.permutations(rotors, 3))
 
-alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+machine = EnigmaMachine("I II III", "A")
+print(optimise_rotor_setting(machine, 1, "HELLOWORLD"))
+exit()
 
-top_fitness_states = []
+possible_config = find_rotor_configuration(code, rotors)
+possible_config = [
+    ['IV II V', 0.026243182184691613, 'M D Q'], 
+    ['II IV III', 0.026219725557461403, 'B A E'], 
+    ['I II III', 0.02621386140065385, 'N E P'], 
+    ['V III IV', 0.02621386140065385, 'C S X'], 
+    ['II V III', 0.02620213308703874, 'M V L']  ]
 
-def fitness_value(a):
-    return a[1]
-
-for permutation in permutations:
-    for a in alphabet:
-        for b in alphabet:
-            if a == b:
-                continue
-            for c in alphabet:
-                if a == c or b == c:
-                    continue
-                
-                starting_positions = a + " " + b + " " + c
-                rotors = permutation[0] + " " + permutation[1] + " " + permutation[2]
-
-                ring_positions = "01 01 01"
-                plugboard = []
-
-                machine = EnigmaMachine(rotors, "B", ring_positions, starting_positions, plugboard)
-                decrypted = machine.encode(code)
-                fitness = abs(index_of_coincidence(decrypted) - 0.0667)
-                state = [rotors, fitness, starting_positions]
-                print(state)
-
-                top_fitness_states.append(state)
-                top_fitness_states.sort(key = fitness_value, reverse = True)
-
-                if len(top_fitness_states) > 5:
-                    top_fitness_states.pop()
-
-print(top_fitness_states)
