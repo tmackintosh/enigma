@@ -11,6 +11,7 @@ def optimise_rotor_setting(machine, rotor_number, code):
 
     while rotor_number > 1:
         rotor = rotor.left_connection
+        rotor_number -= 1
 
     for i in range (0, 26):
         rotor.setting = i

@@ -26,6 +26,8 @@ def find_rotor_configuration(code, rotors):
                     starting_positions = a + " " + b + " " + c
                     rotors = permutation[0] + " " + permutation[1] + " " + permutation[2]
 
+                    print(rotors, starting_positions)
+
                     ring_positions = "01 01 01"
                     plugboard = []
 
